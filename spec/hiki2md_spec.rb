@@ -80,6 +80,10 @@ EOS
     assert("[[google|http://google.com]]", "[google](http://google.com)")
   end
 
+  it "image" do
+    assert("[[http://example.com/abc.gif]]", "![](http://example.com/abc.gif)")
+  end
+
   it "pretext" do
     hiki =<<-EOS
 <<<

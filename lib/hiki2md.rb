@@ -74,6 +74,9 @@ class Hiki2md
       # 取り消し
       line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
 
+      # 画像
+      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
+
       @outputs << line
     end
     @outputs.join("\n")
