@@ -33,3 +33,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/kdmsnr
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
+## Inspired by
+
+https://github.com/masasuzu/p5-App-hiki2md
+
