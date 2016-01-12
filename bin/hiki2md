@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'hiki2md'
+
+if ARGV.size != 1
+  raise ArgumentError.new("no file specified")
+end
+
+if !File.exist?(ARGV[0])
+  raise IOError.new("no exist #{ARGV[0]}")
+end
+
+Hiki2md.new.convert(File.read(ARGV))
