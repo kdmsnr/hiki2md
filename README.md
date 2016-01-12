@@ -1,5 +1,7 @@
 # Hiki2md
 
+Converter of Hiki to Markdown.
+
 ## Installation
 
 Add this line to your application's Gemfile:
