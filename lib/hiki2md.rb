@@ -39,6 +39,7 @@ class Hiki2md
         next
       end
 
+      # form付きの整形済みテキスト(by daddygon 16/3/13)
       if line =~ /\A<<<\s*(.+)/
         @in_preformated_block = true
         form = $1
