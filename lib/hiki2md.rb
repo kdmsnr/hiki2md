@@ -39,6 +39,13 @@ class Hiki2md
         next
       end
 
+      if line =~ /\A<<<\s*(.+)/
+        @in_preformated_block = true
+        form = $1
+        @outputs << "```#{form}\n"
+        next
+      end
+
       # コメント削除
       next if line =~ %r|\A//.*\z|
 
