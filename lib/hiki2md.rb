@@ -84,7 +84,7 @@ class Hiki2md
       line.gsub! /\A[#]{2} ?/  , '  1. '
       line.gsub! /\A[#] ?/     , '1. '
 
-      # descriptions by daddygon 16/3/14
+      # 定義リスト by daddygon 16/3/14
       if line=~/\A\:(.+)\:(.+)/ then
         line = "<dl><dt> #{$1} </dt> <dd> #{$2} </dd></dl>"
       end
