@@ -24,6 +24,19 @@ class Hiki2md
         @in_plugin_block = true
       end
 
+      # テーブル
+      if line =~ /\A\|\|/
+        @in_table_block = true
+        @table_contents << line
+        next
+      end
+
+      if @in_table_block
+        @outputs << make_table(@table_contents)
+        @in_table_block = false
+        @table_contents = []
+      end
+
       # 整形済みテキスト
       if @in_preformatted_block
         if line =~ /\A>>>/
@@ -89,95 +102,93 @@ class Hiki2md
       line.gsub! /\A!{2} ?/ , '## '
       line.gsub! /\A! ?/    , '# '
 
-      if line =~ /\A\|\|/
-        @in_table_block = true
-        @table_contents << line
-        next
-      end
-
       # 画像
       line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
 
-
-      if @in_table_block
-        if !(line =~ /\A\|\|/)
-          @outputs << make_table(@table_contents)
-          @outputs << line
-          @in_table_block = false
-          @table_contents = []
-        end
-      else
-        @outputs << line
-      end
+      @outputs << line
     end
-    @outputs << make_table(@table_contents) if @in_table_block # need when table located at the end.
+
+    # ensure
+    if @in_table_block
+      @outputs << make_table(@table_contents)
+      @in_table_block = false
+      @table_contents = []
+    end
+
     @outputs.join("\n")
   end
 
   # tableから連結作用素に対応したmatrixを作る
-  # input:lineごとに分割されたcont
+  # input:lineごとに分割されたcontents
   # output:matrixと最長列数
-  def make_matrix(cont)
+  def make_matrix(contents)
     t_matrix = []
-    cont.each {|line|
-      row=line.split('||')
-      row.slice!(0)
+    contents.each do |line|
+      row = line.split('||')
+      row.shift
       t_matrix << row
-    }
+    end
+
     # vertical joint row
-    t_matrix.each_with_index {|line,i|
-      line.each_with_index {|ele,j|
-        if ele =~ /\^+/
-          t_matrix[i][j] = "#{$'}"
-          rs = $&.size
-          rs.times{|k| t_matrix[i+k+1].insert(j," ")}
+    t_matrix.each_with_index do |line, i|
+      line.each_with_index do |e, j|
+        if e =~ /\^+/
+          t_matrix[i][j] = Regexp.last_match.post_match
+          Regexp.last_match.size.times do |k|
+            t_matrix[i + k + 1] ||= []
+            t_matrix[i + k + 1].insert(j, " ")
+          end
         end
-      }
-    }
+      end
+    end
+
     # horizontal joint column
     max_col = 0
-    t_matrix.each_with_index {|line,i|
+    t_matrix.each_with_index do |line, i|
       n_col = line.size
       j_col = 0
-      line.each_with_index{|ele,j|
-        if ele =~ />+/
-          cs = $&.size
-          t_matrix[i][j_col] = "#{$'}"
-          cs.times {
+      line.each do |e|
+        if e =~ />+/
+          t_matrix[i][j_col] = Regexp.last_match.post_match
+          cs = Regexp.last_match.size
+          cs.times do
             j_col += 1
             t_matrix[i][j_col] = ""
-          }
+          end
           n_col += cs
         else
-          t_matrix[i][j_col] = ele
+          t_matrix[i][j_col] = e
           j_col += 1
         end
-      }
+      end
       max_col = n_col if n_col > max_col
-    }
-    return t_matrix, max_col
+    end
+
+    [t_matrix, max_col]
   end
 
-  DT_ALIGN = ':----|'
   # tableを整形する
-  def make_table(table_cont)
-    cont,max_col = make_matrix(table_cont)
+  def make_table(table_contents)
+    contents, max_col = make_matrix(table_contents)
 
     align_line = "|"
-    max_col.times { align_line << DT_ALIGN}
+    max_col.times { align_line << ':----|' }
     align_line << "\n"
 
-    buf = "\n"
-    cont.each_with_index {|line,i|
-      buf0 = "|"
-      line.each{|ele|
-        buf0 << "#{ele}|"
-      }
-      buf << buf0+"\n"
-      buf << align_line if i == 0 #insert table alignment after 1st line
-    }
-    return buf
+    table = "\n"
+    contents.each_with_index do |line, idx|
+      row = "|"
+      line.each do |e|
+        row << "#{e}|"
+      end
+      table << row + "\n"
+
+      # insert table alignment after 1st line
+      if idx == 0
+        table << align_line
+      end
+    end
+
+    table
   end
-
 end
-
