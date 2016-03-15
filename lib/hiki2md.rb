@@ -50,9 +50,9 @@ class Hiki2md
       # コメント削除
       next if line =~ %r|\A//.*\z|
 
-      # 整形済みテキスト
-      # hikiにて改行を省略した場合に対応
-      line.gsub! /\A[ \t]+/, '    '
+        # 整形済みテキスト
+        # hikiにて改行を省略した場合に対応
+        line.gsub! /\A[ \t]+/, '    '
 
 
       # 引用
@@ -78,7 +78,7 @@ class Hiki2md
       line.gsub! /\A[#] ?/     , '1. '
 
       # 定義リスト
-      if line=~/\A\:(.+)\:(.+)/
+      if line =~ /\A\:(.+)\:(.+)/
         line = "<dl><dt> #{$1} </dt> <dd> #{$2} </dd></dl>"
       end
 
@@ -118,63 +118,63 @@ class Hiki2md
   # input:lineごとに分割されたcont
   # output:matrixと最長列数
   def make_matrix(cont)
-    t_matrix=[]
-    cont.each{|line|
+    t_matrix = []
+    cont.each {|line|
       row=line.split('||')
       row.slice!(0)
       t_matrix << row
     }
     # vertical joint row
-    t_matrix.each_with_index{|line,i|
-      line.each_with_index{|ele,j|
-        if ele=~/\^+/
-          t_matrix[i][j]="#{$'}"
-          rs=$&.size
+    t_matrix.each_with_index {|line,i|
+      line.each_with_index {|ele,j|
+        if ele =~ /\^+/
+          t_matrix[i][j] = "#{$'}"
+          rs = $&.size
           rs.times{|k| t_matrix[i+k+1].insert(j," ")}
         end
       }
     }
     # horizontal joint column
-    max_col=0
-    t_matrix.each_with_index{|line,i|
-      n_col=line.size
-      j_col=0
+    max_col = 0
+    t_matrix.each_with_index {|line,i|
+      n_col = line.size
+      j_col = 0
       line.each_with_index{|ele,j|
-        if ele=~/>+/
-          cs=$&.size
-          t_matrix[i][j_col]="#{$'}"
-          cs.times{
-            j_col+=1
-            t_matrix[i][j_col]=""
+        if ele =~ />+/
+          cs = $&.size
+          t_matrix[i][j_col] = "#{$'}"
+          cs.times {
+            j_col += 1
+            t_matrix[i][j_col] = ""
           }
-          n_col+=cs
+          n_col += cs
         else
-          t_matrix[i][j_col]=ele
-          j_col+=1
+          t_matrix[i][j_col] = ele
+          j_col += 1
         end
       }
-      max_col = n_col if n_col>max_col
+      max_col = n_col if n_col > max_col
     }
-    return t_matrix,max_col
+    return t_matrix, max_col
   end
 
-  DT_ALIGN=':----|'
+  DT_ALIGN = ':----|'
   # tableを整形する
   def make_table(table_cont)
     cont,max_col = make_matrix(table_cont)
 
     align_line = "|"
-    max_col.times{ align_line << DT_ALIGN}
+    max_col.times { align_line << DT_ALIGN}
     align_line << "\n"
 
     buf = "\n"
-    cont.each_with_index{|line,i|
+    cont.each_with_index {|line,i|
       buf0 = "|"
       line.each{|ele|
         buf0 << "#{ele}|"
       }
       buf << buf0+"\n"
-      buf << align_line if i==0 #insert table alignment after 1st line
+      buf << align_line if i == 0 #insert table alignment after 1st line
     }
     return buf
   end
