@@ -99,6 +99,7 @@ class Hiki2md
         @table_contents << line
         next
       end
+
       if @in_table_block then
         if !(line =~ /\A\|\|/) then
           @outputs << make_table(@table_contents)
@@ -110,7 +111,7 @@ class Hiki2md
         @outputs << line
       end
     end
-    @outputs << make_table(@table_contents) if @in_table_block
+    @outputs << make_table(@table_contents) if @in_table_block # need when table locates last.
     @outputs.join("\n")
   end
 

@@ -142,7 +142,7 @@ EOS
     assert(hiki, md.chomp)
   end
 
-  it "pre_formatted_with_name" do
+  it "pre_formatted_with_code_name" do
     hiki =<<-EOS
 <<<ruby
   p "hello world."
