@@ -52,8 +52,7 @@ class Hiki2md
 
       # 整形済みテキスト
       # hikiにて改行を省略した場合に対応
-#      line.gsub! /\A[ \t]+/, '    '
-      line.gsub! /\A[ \t]+/, "\n\t"
+      line.gsub! /\A[ \t]+/, '    '
 
 
       # 引用
@@ -68,10 +67,6 @@ class Hiki2md
 
       # 取り消し
       line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
-
-      # 画像
-      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
-
 
       # 箇条書き
       line.gsub! /\A[*]{3} ?/, '    - '
@@ -99,6 +94,10 @@ class Hiki2md
         @table_contents << line
         next
       end
+
+      # 画像
+      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
+
 
       if @in_table_block then
         if !(line =~ /\A\|\|/) then
