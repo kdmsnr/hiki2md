@@ -78,7 +78,7 @@ class Hiki2md
       line.gsub! /\A[#] ?/     , '1. '
 
       # 定義リスト
-      if line=~/\A\:(.+)\:(.+)/ then
+      if line=~/\A\:(.+)\:(.+)/
         line = "<dl><dt> #{$1} </dt> <dd> #{$2} </dd></dl>"
       end
 
@@ -89,7 +89,7 @@ class Hiki2md
       line.gsub! /\A!{2} ?/ , '## '
       line.gsub! /\A! ?/    , '# '
 
-      if line =~ /\A\|\|/ then
+      if line =~ /\A\|\|/
         @in_table_block = true
         @table_contents << line
         next
@@ -99,8 +99,8 @@ class Hiki2md
       line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
 
 
-      if @in_table_block then
-        if !(line =~ /\A\|\|/) then
+      if @in_table_block
+        if !(line =~ /\A\|\|/)
           @outputs << make_table(@table_contents)
           @outputs << line
           @in_table_block = false
@@ -127,7 +127,7 @@ class Hiki2md
     # vertical joint row
     t_matrix.each_with_index{|line,i|
       line.each_with_index{|ele,j|
-        if ele=~/\^+/ then
+        if ele=~/\^+/
           t_matrix[i][j]="#{$'}"
           rs=$&.size
           rs.times{|k| t_matrix[i+k+1].insert(j," ")}
@@ -140,7 +140,7 @@ class Hiki2md
       n_col=line.size
       j_col=0
       line.each_with_index{|ele,j|
-        if ele=~/>+/ then
+        if ele=~/>+/
           cs=$&.size
           t_matrix[i][j_col]="#{$'}"
           cs.times{
