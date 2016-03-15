@@ -174,8 +174,8 @@ EOS
   end
 
   it "description_list" do
-    hiki =":list1:list2"
-    md ="<dl><dt> list1 </dt> <dd> list2 </dd></dl>"
+    hiki = ":list1:list2"
+    md = "<dl><dt>list1</dt><dd>list2</dd></dl>"
     assert(hiki, md.chomp)
   end
 

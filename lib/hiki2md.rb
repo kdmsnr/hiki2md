@@ -9,6 +9,7 @@ class Hiki2md
     @in_preformatted_block = false
     @in_table_block = false
     @table_contents = []
+
     lines.split(/\n/).each do |line|
       # プラグイン
       if @in_plugin_block
@@ -47,13 +48,12 @@ class Hiki2md
         next
       end
 
+      # 整形済みテキスト
+      # hikiにて改行を省略した場合に対応
+      line.gsub! /\A[ \t]+/, '    '
+
       # コメント削除
       next if line =~ %r|\A//.*\z|
-
-        # 整形済みテキスト
-        # hikiにて改行を省略した場合に対応
-        line.gsub! /\A[ \t]+/, '    '
-
 
       # 引用
       line.gsub! /\A""/, '>'
@@ -79,7 +79,7 @@ class Hiki2md
 
       # 定義リスト
       if line =~ /\A\:(.+)\:(.+)/
-        line = "<dl><dt> #{$1} </dt> <dd> #{$2} </dd></dl>"
+        line = "<dl><dt>#{$1}</dt><dd>#{$2}</dd></dl>"
       end
 
       # 見出し
