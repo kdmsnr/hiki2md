@@ -111,7 +111,7 @@ class Hiki2md
         @outputs << line
       end
     end
-    @outputs << make_table(@table_contents) if @in_table_block # need when table locates last.
+    @outputs << make_table(@table_contents) if @in_table_block # need when table located at the end.
     @outputs.join("\n")
   end
 
