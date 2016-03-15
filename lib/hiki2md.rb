@@ -7,7 +7,9 @@ class Hiki2md
 
     @in_plugin_block = false
     @in_preformatted_block = false
+    @in_multiline_preformatted_block = false
     @in_table_block = false
+    @in_dl_block = false
     @table_contents = []
 
     lines.split(/\n/).each do |line|
@@ -37,10 +39,10 @@ class Hiki2md
         @table_contents = []
       end
 
-      # 整形済みテキスト
-      if @in_preformatted_block
+      # 整形済みテキスト（複数行）
+      if @in_multiline_preformatted_block
         if line =~ /\A>>>/
-          @in_preformatted_block = false
+          @in_multiline_preformatted_block = false
           @outputs << '```'
           next
         end
@@ -48,22 +50,28 @@ class Hiki2md
         next
       end
 
-      if line =~ /\A<<<\z/
-        @in_preformatted_block = true
-        @outputs << '```'
-        next
-      end
-
-      # form付きの整形済みテキスト
-      if line =~ /\A<<<\s*(.+)/
-        @in_preformatted_block = true
+      if line =~ /\A<<<\s*(.*)/
+        @in_multiline_preformatted_block = true
         @outputs << "```#{$1}"
         next
       end
 
       # 整形済みテキスト
-      # hikiにて改行を省略した場合に対応
-      line.gsub! /\A[ \t]+/, '    '
+      if @in_preformatted_block
+        if line =~ /\A[ \t]+/
+          @outputs << line.strip
+          next
+        else
+          @outputs << "```"
+          @in_preformatted_block = false
+        end
+      end
+
+      if line =~ /\A[ \t]+/
+        @in_preformatted_block = true
+        @outputs << "```\n#{line.strip}"
+        next
+      end
 
       # コメント削除
       next if line =~ %r|\A//.*\z|
@@ -92,7 +100,19 @@ class Hiki2md
 
       # 定義リスト
       if line =~ /\A\:(.+)\:(.+)/
-        line = "<dl><dt>#{$1}</dt><dd>#{$2}</dd></dl>"
+        unless @in_dl_block
+          @outputs << "<dl>"
+        end
+        @outputs << "<dt>#{$1}</dt><dd>#{$2}</dd>"
+        @in_dl_block = true
+        next
+      end
+
+      if @in_dl_block
+        if line !=~ /\A\:.+\:.+/
+          @outputs << "</dl>"
+          @in_dl_block = false
+        end
       end
 
       # 見出し
@@ -114,6 +134,18 @@ class Hiki2md
       @in_table_block = false
       @table_contents = []
     end
+
+    # ensure
+    if @in_preformatted_block
+      @outputs << "```"
+    end
+
+    # ensure
+    if @in_dl_block
+      @outputs << "</dl>"
+      @in_dl_block = false
+    end
+
 
     @outputs.join("\n")
   end

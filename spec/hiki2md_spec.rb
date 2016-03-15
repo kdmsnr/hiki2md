@@ -117,10 +117,12 @@ EOS
 EOS
 
     md =<<-EOS
-    pre
-    text
-    
-    text
+```
+pre
+text
+
+text
+```
 EOS
 
     assert(hiki, md.chomp)
@@ -174,8 +176,17 @@ EOS
   end
 
   it "description_list" do
-    hiki = ":list1:list2"
-    md = "<dl><dt>list1</dt><dd>list2</dd></dl>"
+    hiki =<<EOS
+:list1-1:list1-2
+:list2-1:list2-2
+EOS
+
+    md =<<EOS
+<dl>
+<dt>list1-1</dt><dd>list1-2</dd>
+<dt>list2-1</dt><dd>list2-2</dd>
+</dl>
+EOS
     assert(hiki, md.chomp)
   end
 
