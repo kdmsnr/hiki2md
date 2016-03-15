@@ -28,7 +28,7 @@ describe Hiki2md do
       %Q|this is *strong* text. this is **very storng** text.|)
   end
 
-  it 'lsit' do
+  it 'list' do
     hiki =<<-EOS
 * list1
 ** list2
@@ -141,4 +141,42 @@ EOS
 
     assert(hiki, md.chomp)
   end
+
+  it "pre_formatted_with_name" do
+    hiki =<<-EOS
+<<<ruby
+  p "hello world."
+>>>
+EOS
+    md =<<-EOS
+```ruby
+  p "hello world."
+```
+EOS
+    assert(hiki, md.chomp)
+  end
+
+  it "table" do
+    hiki =<<-EOS
+||test1||test2||test3
+||^test4||>test5
+||test6||test7
+EOS
+    md =<<-EOS
+
+|test1|test2|test3|
+|:----|:----|:----|
+|test4|test5||
+| |test6|test7|
+
+EOS
+    assert(hiki, md.chomp)
+  end
+
+  it "description_list" do
+    hiki =":list1:list2"
+    md ="<dl><dt> list1 </dt> <dd> list2 </dd></dl>"
+    assert(hiki, md.chomp)
+  end
+
 end
