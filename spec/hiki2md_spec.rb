@@ -190,4 +190,19 @@ EOS
     assert(hiki, md.chomp)
   end
 
+  it "should correctly convert modified_table" do
+    hiki =<<-EOS
+||''test1''||==test2==||test3
+||[[http://example.com/abc.gif]]||[[http://example.com/abcd.gif]]||
+EOS
+    md =<<-EOS
+
+|*test1*|~~test2~~|test3|
+|:----|:----|:----|
+|![](http://example.com/abc.gif)|![](http://example.com/abcd.gif)|
+
+EOS
+    assert(hiki, md.chomp)
+  end
+
 end

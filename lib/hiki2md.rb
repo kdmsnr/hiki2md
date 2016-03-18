@@ -26,6 +26,25 @@ class Hiki2md
         @in_plugin_block = true
       end
 
+      # コメント削除
+      next if line =~ %r|\A//.*\z|
+
+      # 引用
+      line.gsub! /\A""/, '>'
+
+      # リンク
+      line.gsub! /\[{2}([^\[\]\|]+?)\|([^\[\]\|]+?)\]{2}/, "[\\1](\\2)"
+
+      # 強調
+      line.gsub! /'''(.+)'''/, "**\\1**"
+      line.gsub! /''(.+)''/, "*\\1*"
+
+      # 取り消し
+      line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
+
+      # 画像
+      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
+
       # テーブル
       if line =~ /\A\|\|/
         @in_table_block = true
@@ -73,22 +92,6 @@ class Hiki2md
         next
       end
 
-      # コメント削除
-      next if line =~ %r|\A//.*\z|
-
-      # 引用
-      line.gsub! /\A""/, '>'
-
-      # リンク
-      line.gsub! /\[{2}([^\[\]\|]+?)\|([^\[\]\|]+?)\]{2}/, "[\\1](\\2)"
-
-      # 強調
-      line.gsub! /'''(.+)'''/, "**\\1**"
-      line.gsub! /''(.+)''/, "*\\1*"
-
-      # 取り消し
-      line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
-
       # 箇条書き
       line.gsub! /\A[*]{3} ?/, '    - '
       line.gsub! /\A[*]{2} ?/, '  - '
@@ -116,15 +119,13 @@ class Hiki2md
       end
 
       # 見出し
-      line.gsub! /\A!{5} ?/ , '##### '
-      line.gsub! /\A!{4} ?/ , '#### '
-      line.gsub! /\A!{3} ?/ , '### '
-      line.gsub! /\A!{2} ?/ , '## '
-      line.gsub! /\A! ?/    , '# '
-
-      # 画像
-      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
-
+      unless line=~ /\A!\[\]?/ #exclude image at the beginning of a line
+        line.gsub! /\A!{5} ?/ , '##### '
+        line.gsub! /\A!{4} ?/ , '#### '
+        line.gsub! /\A!{3} ?/ , '### '
+        line.gsub! /\A!{2} ?/ , '## '
+        line.gsub! /\A! ?/    , '# '
+      end
       @outputs << line
     end
 
@@ -145,7 +146,6 @@ class Hiki2md
       @outputs << "</dl>"
       @in_dl_block = false
     end
-
 
     @outputs.join("\n")
   end
