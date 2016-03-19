@@ -26,19 +26,6 @@ class Hiki2md
         @in_plugin_block = true
       end
 
-      # テーブル
-      if line =~ /\A\|\|/
-        @in_table_block = true
-        @table_contents << line
-        next
-      end
-
-      if @in_table_block
-        @outputs << make_table(@table_contents)
-        @in_table_block = false
-        @table_contents = []
-      end
-
       # 整形済みテキスト（複数行）
       if @in_multiline_preformatted_block
         if line =~ /\A>>>/
@@ -124,6 +111,19 @@ class Hiki2md
 
       # 画像
       line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
+
+      # テーブル
+      if line =~ /\A\|\|/
+        @in_table_block = true
+        @table_contents << line
+        next
+      end
+
+      if @in_table_block
+        @outputs << make_table(@table_contents)
+        @in_table_block = false
+        @table_contents = []
+      end
 
       @outputs << line
     end
