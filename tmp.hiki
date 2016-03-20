@@ -1,0 +1,11 @@
+Dear sir
+
+Daddygongonです．pull request採用ありがとうございます．便乗です．
+  it "should correctly convert modified_table"
+を入れました．ご検討ください．
+
+blockがつながる場合
+ :list1-1:list1-2
+ ||test1||test2||test3
+うまく変換されないのですが，ちょっと考えたんですが，やたら長くなるのでやめときます．
+空白行挿入で逃げられるので．．．
