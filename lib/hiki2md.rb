@@ -81,16 +81,18 @@ class Hiki2md
       line.gsub! /\A[*]{2} ?/, '  - '
       line.gsub! /\A[*] ?/   , '- '
 
-      line.gsub! /\A[#]{3} ?/  , '    1. '
-      line.gsub! /\A[#]{2} ?/  , '  1. '
+      line.gsub! /\A[#]{3} ?/  , '      1. '
+      line.gsub! /\A[#]{2} ?/  , '   1. '
       line.gsub! /\A[#] ?/     , '1. '
 
-      # 定義リスト
-      if line =~ /\A\:(.+)\:(.+)/
+      # 定義リスト description_list
+      if m0 = line.match(/\A\:(.+)\:(.*)/)
+        m1=m0[1].gsub /\[(.*)\]\((.*)\)/, "<a href=\"\\2\">\\1</a>" #for link in dlist
+        m2=m0[2].gsub /\[(.*)\]\((.*)\)/, "<a href=\"\\2\">\\1</a>"
         unless @in_dl_block
           @outputs << "<dl>"
         end
-        @outputs << "<dt>#{$1}</dt><dd>#{$2}</dd>"
+        @outputs << "<dt>#{m1}</dt><dd>#{m2}</dd>"
         @in_dl_block = true
         next
       end

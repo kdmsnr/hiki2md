@@ -62,11 +62,11 @@ EOS
 
     md =<<-EOS
 1. list1
-  1. list2
+   1. list2
 1. list1
-  1. list2
-    1. list3
-  1. list2
+   1. list2
+      1. list3
+   1. list2
 EOS
 
     assert(hiki, md.chomp)
@@ -179,12 +179,16 @@ EOS
     hiki =<<EOS
 :list1-1:list1-2
 :list2-1:list2-2
+:list3-1:
+:[[list4-1|http1]]:[[list4-2|http2]]
 EOS
 
     md =<<EOS
 <dl>
 <dt>list1-1</dt><dd>list1-2</dd>
 <dt>list2-1</dt><dd>list2-2</dd>
+<dt>list3-1</dt><dd></dd>
+<dt><a href="http1">list4-1</a></dt><dd><a href="http2">list4-2</a></dd>
 </dl>
 EOS
     assert(hiki, md.chomp)
