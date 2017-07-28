@@ -86,7 +86,7 @@ class Hiki2md
       line.gsub! /\A[#] ?/     , '1. '
 
       # 定義リスト
-      if line =~ /\A\:(.+)\:(.+)/
+      if line =~ /\A\:(.+)\:(.*)/
         unless @in_dl_block
           @outputs << "<dl>"
         end

@@ -179,12 +179,14 @@ EOS
     hiki =<<EOS
 :list1-1:list1-2
 :list2-1:list2-2
+:list3-1:
 EOS
 
     md =<<EOS
 <dl>
 <dt>list1-1</dt><dd>list1-2</dd>
 <dt>list2-1</dt><dd>list2-2</dd>
+<dt>list3-1</dt><dd></dd>
 </dl>
 EOS
     assert(hiki, md.chomp)
