@@ -62,11 +62,11 @@ EOS
 
     md =<<-EOS
 1. list1
-  1. list2
+   1. list2
 1. list1
-  1. list2
-    1. list3
-  1. list2
+   1. list2
+      1. list3
+   1. list2
 EOS
 
     assert(hiki, md.chomp)

@@ -81,11 +81,11 @@ class Hiki2md
       line.gsub! /\A[*]{2} ?/, '  - '
       line.gsub! /\A[*] ?/   , '- '
 
-      line.gsub! /\A[#]{3} ?/  , '    1. '
-      line.gsub! /\A[#]{2} ?/  , '  1. '
+      line.gsub! /\A[#]{3} ?/  , '      1. '
+      line.gsub! /\A[#]{2} ?/  , '   1. '
       line.gsub! /\A[#] ?/     , '1. '
 
-      # 定義リスト
+      # 定義リスト description_list
       if line =~ /\A\:(.+)\:(.*)/
         unless @in_dl_block
           @outputs << "<dl>"
