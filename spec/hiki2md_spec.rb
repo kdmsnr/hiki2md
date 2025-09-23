@@ -220,4 +220,7 @@ EOS
     assert(hiki, md.chomp)
   end
 
+  it "hr" do
+    assert("----", "\n---\n")
+  end
 end

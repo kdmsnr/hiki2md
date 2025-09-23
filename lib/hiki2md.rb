@@ -63,6 +63,12 @@ class Hiki2md
       # コメント削除
       next if line =~ %r|\A//.*\z|
 
+      # 水平線
+      if line =~ /\A----\z/
+        @outputs << "\n---\n"
+        next
+      end
+
       # 引用
       line.gsub! /\A""/, '>'
 
