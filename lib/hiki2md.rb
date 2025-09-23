@@ -79,11 +79,11 @@ class Hiki2md
       line.gsub! /\A[#] ?/     , '1. '
 
       # 見出し
-      line.gsub! /\A!{5} ?/ , '##### '
-      line.gsub! /\A!{4} ?/ , '#### '
-      line.gsub! /\A!{3} ?/ , '### '
-      line.gsub! /\A!{2} ?/ , '## '
-      line.gsub! /\A! ?/    , '# '
+      line.gsub! /\A!{5} ?/ , '###### '
+      line.gsub! /\A!{4} ?/ , '##### '
+      line.gsub! /\A!{3} ?/ , '#### '
+      line.gsub! /\A!{2} ?/ , '### '
+      line.gsub! /\A! ?/    , '## '
 
       # 引用
       line.gsub! /\A""/, '>'

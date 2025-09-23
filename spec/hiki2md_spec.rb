@@ -10,16 +10,16 @@ describe Hiki2md do
   end
 
   it 'headline' do
-    assert("! Headline1"    , "# Headline1")
-    assert("!Headline1"     , "# Headline1")
-    assert("!! Headline2"   , "## Headline2")
-    assert("!!Headline2"    , "## Headline2")
-    assert("!!! Headline3"  , "### Headline3")
-    assert("!!!Headline3"   , "### Headline3")
-    assert("!!!! Headline4" , "#### Headline4")
-    assert("!!!!Headline4"  , "#### Headline4")
-    assert("!!!!! Headline5", "##### Headline5")
-    assert("!!!!!Headline5" , "##### Headline5")
+    assert("! Headline1"    , "## Headline1")
+    assert("!Headline1"     , "## Headline1")
+    assert("!! Headline2"   , "### Headline2")
+    assert("!!Headline2"    , "### Headline2")
+    assert("!!! Headline3"  , "#### Headline3")
+    assert("!!!Headline3"   , "#### Headline3")
+    assert("!!!! Headline4" , "##### Headline4")
+    assert("!!!!Headline4"  , "##### Headline4")
+    assert("!!!!! Headline5", "###### Headline5")
+    assert("!!!!!Headline5" , "###### Headline5")
   end
 
   it 'strong' do
@@ -213,9 +213,9 @@ EOS
 ![[test1]]
 EOS
     md =<<-EOS
-# *test1*
-# ~~test1~~
-# [test1](test1.md)
+## *test1*
+## ~~test1~~
+## [test1](test1.md)
 EOS
     assert(hiki, md.chomp)
   end
