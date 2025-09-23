@@ -232,4 +232,11 @@ EOS
     assert("text https://example.com text", "text <https://example.com> text")
     assert("text http://example.com text", "text <http://example.com> text")
   end
+
+  it "autolink wikiname" do
+    assert("this is a WikiName.", "this is a [WikiName](WikiName.md).")
+    assert("HogeRule1 is a WikiName.", "[HogeRule1](HogeRule1.md) is a [WikiName](WikiName.md).")
+    assert("NOTWIKINAME", "NOTWIKINAME")
+    assert("http://WikiName", "<http://WikiName>") # 既にリンクになっている場合は変換しない
+  end
 end
