@@ -228,6 +228,11 @@ EOS
     assert("[[PageName]]", "[PageName](PageName.md)")
   end
 
+  it "interwiki link" do
+    assert('[[Google:ruby wiki]]', '[Google:ruby wiki](https://www.google.com/search?q=ruby%20wiki)')
+    assert('[[ruby-talk:12345]]', '[ruby-talk:12345](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/12345)')
+  end
+
   it "autolink url" do
     assert("text https://example.com text", "text <https://example.com> text")
     assert("text http://example.com text", "text <http://example.com> text")

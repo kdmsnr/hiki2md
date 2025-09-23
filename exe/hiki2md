@@ -1,12 +1,31 @@
 #!/usr/bin/env ruby
 require 'hiki2md'
+require 'optparse'
+require 'yaml'
+
+interwiki_map = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: hiki2md [options] <file>"
+
+  opts.on("--interwiki-map PATH", "Path to a YAML file for InterWiki definitions") do |path|
+    if File.exist?(path)
+      interwiki_map.merge!(YAML.load_file(path))
+    else
+      raise IOError.new("InterWiki map file not found: #{path}")
+    end
+  end
+end.parse!
 
 if ARGV.size != 1
   raise ArgumentError.new("no file specified")
 end
 
-if !File.exist?(ARGV[0])
-  raise IOError.new("no exist #{ARGV[0]}")
+input_file = ARGV[0]
+
+if !File.exist?(input_file)
+  raise IOError.new("no exist #{input_file}")
 end
 
-puts Hiki2md.new.convert(File.read(ARGV[0]))
+hiki2md = Hiki2md.new(interwiki_map: interwiki_map)
+puts hiki2md.convert(File.read(input_file))

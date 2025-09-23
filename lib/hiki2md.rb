@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 require 'hiki2md/version'
+require 'cgi'
 
 class Hiki2md
+  def initialize(interwiki_map: {})
+    @interwiki_map = interwiki_map
+  end
+
   def convert(lines)
     @outputs = []
 
@@ -96,6 +101,15 @@ class Hiki2md
         content = $1
         if content =~ /\Ahttps?:\/\// || content =~ /\.(png|jpg|jpeg|gif|bmp|svg)\z/i
           "![](#{content})"
+        elsif content =~ /\A([^:]+):(.+)\z/
+          interwiki_name = $1
+          page_name = $2
+          if @interwiki_map[interwiki_name]
+            url = @interwiki_map[interwiki_name] + CGI.escape(page_name).gsub('+', '%20')
+            "[#{content}](#{url})"
+          else
+            "[#{content}](#{content}.md)"
+          end
         else
           "[#{content}](#{content}.md)"
         end
