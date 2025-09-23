@@ -227,4 +227,9 @@ EOS
   it "wikiname link" do
     assert("[[PageName]]", "[PageName](PageName.md)")
   end
+
+  it "autolink url" do
+    assert("text https://example.com text", "text <https://example.com> text")
+    assert("text http://example.com text", "text <http://example.com> text")
+  end
 end

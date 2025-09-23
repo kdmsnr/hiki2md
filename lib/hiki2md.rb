@@ -101,6 +101,9 @@ class Hiki2md
         end
       end
 
+      # URL自動リンク
+      line.gsub!(/(?<![\(\[])(https?:\/\/[^\s<>]+)/, '<\1>')
+
       # 強調
       line.gsub! /'''(.+)'''/, "**\\1**"
       line.gsub! /''(.+)''/, "*\\1*"
