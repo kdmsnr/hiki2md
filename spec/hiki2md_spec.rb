@@ -215,12 +215,16 @@ EOS
     md =<<-EOS
 # *test1*
 # ~~test1~~
-# ![](test1)
+# [test1](test1.md)
 EOS
     assert(hiki, md.chomp)
   end
 
   it "hr" do
     assert("----", "\n---\n")
+  end
+
+  it "wikiname link" do
+    assert("[[PageName]]", "[PageName](PageName.md)")
   end
 end

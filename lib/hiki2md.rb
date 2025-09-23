@@ -69,19 +69,6 @@ class Hiki2md
         next
       end
 
-      # 引用
-      line.gsub! /\A""/, '>'
-
-      # リンク
-      line.gsub! /\[{2}([^\[\]\|]+?)\|([^\[\]\|]+?)\]{2}/, "[\\1](\\2)"
-
-      # 強調
-      line.gsub! /'''(.+)'''/, "**\\1**"
-      line.gsub! /''(.+)''/, "*\\1*"
-
-      # 取り消し
-      line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
-
       # 箇条書き
       line.gsub! /\A[*]{3} ?/, '    - '
       line.gsub! /\A[*]{2} ?/, '  - '
@@ -90,6 +77,37 @@ class Hiki2md
       line.gsub! /\A[#]{3} ?/  , '    1. '
       line.gsub! /\A[#]{2} ?/  , '  1. '
       line.gsub! /\A[#] ?/     , '1. '
+
+      # 見出し
+      line.gsub! /\A!{5} ?/ , '##### '
+      line.gsub! /\A!{4} ?/ , '#### '
+      line.gsub! /\A!{3} ?/ , '### '
+      line.gsub! /\A!{2} ?/ , '## '
+      line.gsub! /\A! ?/    , '# '
+
+      # 引用
+      line.gsub! /\A""/, '>'
+
+      # リンク
+      line.gsub! /\[{2}([^\[\]\|]+?)\|([^\[\]\|]+?)\]{2}/, "[\\1](\\2)"
+
+      # 画像 or Wiki内リンク
+      line.gsub!(/\[{2}(.+?)\]{2}/) do |match|
+        content = $1
+        if content =~ /\Ahttps?:\/\// || content =~ /\.(png|jpg|jpeg|gif|bmp|svg)\z/i
+          "![](#{content})"
+        else
+          "[#{content}](#{content}.md)"
+        end
+      end
+
+      # 強調
+      line.gsub! /'''(.+)'''/, "**\\1**"
+      line.gsub! /''(.+)''/, "*\\1*"
+
+      # 取り消し
+      line.gsub! /\=\=(.+)\=\=/, "~~\\1~~"
+
 
       # 定義リスト
       if line =~ /\A\:(.+)\:(.+)/
@@ -107,16 +125,6 @@ class Hiki2md
           @in_dl_block = false
         end
       end
-
-      # 見出し
-      line.gsub! /\A!{5} ?/ , '##### '
-      line.gsub! /\A!{4} ?/ , '#### '
-      line.gsub! /\A!{3} ?/ , '### '
-      line.gsub! /\A!{2} ?/ , '## '
-      line.gsub! /\A! ?/    , '# '
-
-      # 画像
-      line.gsub! /\[{2}([^\[\]\|]+?)\]{2}/, "![](\\1)"
 
       # テーブル
       if line =~ /\A\|\|/
