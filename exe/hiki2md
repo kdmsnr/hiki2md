@@ -4,6 +4,8 @@ require 'optparse'
 require 'yaml'
 
 interwiki_map = {}
+use_wiki_name = true
+preserve_plugins = false
 
 OptionParser.new do |opts|
   opts.banner = "Usage: hiki2md [options] <file>"
@@ -14,6 +16,14 @@ OptionParser.new do |opts|
     else
       raise IOError.new("InterWiki map file not found: #{path}")
     end
+  end
+
+  opts.on("--[no-]wiki-name", "Enable or disable WikiName autolinking") do |enabled|
+    use_wiki_name = enabled
+  end
+
+  opts.on("--preserve-plugins", "Keep Hiki plugins as escaped Markdown text") do
+    preserve_plugins = true
   end
 end.parse!
 
@@ -27,5 +37,9 @@ if !File.exist?(input_file)
   raise IOError.new("no exist #{input_file}")
 end
 
-hiki2md = Hiki2md.new(interwiki_map: interwiki_map)
+hiki2md = Hiki2md.new(
+  interwiki_map: interwiki_map,
+  use_wiki_name: use_wiki_name,
+  preserve_plugins: preserve_plugins
+)
 puts hiki2md.convert(File.read(input_file))
