@@ -3,9 +3,88 @@ require 'hiki2md'
 require 'optparse'
 require 'yaml'
 
+module Hiki2mdCommand
+  class InputEncodingError < StandardError; end
+
+  BOM_ENCODINGS = [
+    [[0x00, 0x00, 0xfe, 0xff].pack('C*'), Encoding::UTF_32],
+    [[0xff, 0xfe, 0x00, 0x00].pack('C*'), Encoding::UTF_32],
+    [[0xfe, 0xff].pack('C*'), Encoding::UTF_16],
+    [[0xff, 0xfe].pack('C*'), Encoding::UTF_16],
+    [[0xef, 0xbb, 0xbf].pack('C*'), Encoding::UTF_8]
+  ].freeze
+  AUTO_ENCODINGS = [
+    Encoding::UTF_8,
+    Encoding::EUC_JP,
+    Encoding::Windows_31J
+  ].freeze
+
+  module_function
+
+  def read_source(path, requested_encoding = nil)
+    bytes = File.binread(path)
+    encoding = if requested_encoding.nil? || requested_encoding.casecmp('auto').zero?
+                 detect_encoding(bytes)
+               else
+                 find_encoding(requested_encoding)
+               end
+
+    unless encoding
+      raise InputEncodingError,
+            "#{path}: unable to detect input encoding; " \
+            "use --input-encoding ENCODING"
+    end
+
+    source = bytes.dup.force_encoding(encoding)
+    unless source.valid_encoding?
+      raise InputEncodingError,
+            "#{path}: invalid byte sequence in #{encoding.name}"
+    end
+
+    source.encode(Encoding::UTF_8).sub(/\A\uFEFF/, '')
+  rescue Encoding::InvalidByteSequenceError,
+         Encoding::UndefinedConversionError => error
+    raise InputEncodingError,
+          "#{path}: cannot convert #{encoding.name} to UTF-8: #{error.message}"
+  end
+
+  def detect_encoding(bytes)
+    bom = BOM_ENCODINGS.find { |marker, _encoding| bytes.start_with?(marker) }
+    return bom[1] if bom
+
+    if iso_2022_jp?(bytes) && decodable_as?(bytes, Encoding::ISO_2022_JP)
+      return Encoding::ISO_2022_JP
+    end
+
+    AUTO_ENCODINGS.find { |encoding| decodable_as?(bytes, encoding) }
+  end
+
+  def iso_2022_jp?(bytes)
+    bytes.include?("\e$") || bytes.include?("\e(")
+  end
+
+  def decodable_as?(bytes, encoding)
+    source = bytes.dup.force_encoding(encoding)
+    source.valid_encoding? && begin
+      source.encode(Encoding::UTF_8)
+      true
+    rescue Encoding::InvalidByteSequenceError,
+           Encoding::UndefinedConversionError
+      false
+    end
+  end
+
+  def find_encoding(name)
+    Encoding.find(name)
+  rescue ArgumentError
+    raise InputEncodingError, "unknown input encoding: #{name}"
+  end
+end
+
 interwiki_map = {}
 use_wiki_name = true
 preserve_plugins = false
+input_encoding = nil
 
 OptionParser.new do |opts|
   opts.banner = "Usage: hiki2md [options] <file>"
@@ -25,6 +104,14 @@ OptionParser.new do |opts|
   opts.on("--preserve-plugins", "Keep Hiki plugins as escaped Markdown text") do
     preserve_plugins = true
   end
+
+  opts.on(
+    "-E",
+    "--input-encoding ENCODING",
+    "Source encoding (default: auto)"
+  ) do |encoding|
+    input_encoding = encoding
+  end
 end.parse!
 
 if ARGV.size != 1
@@ -42,4 +129,12 @@ hiki2md = Hiki2md.new(
   use_wiki_name: use_wiki_name,
   preserve_plugins: preserve_plugins
 )
-puts hiki2md.convert(File.read(input_file))
+
+begin
+  source = Hiki2mdCommand.read_source(input_file, input_encoding)
+rescue Hiki2mdCommand::InputEncodingError => error
+  warn "hiki2md: #{error.message}"
+  exit 1
+end
+
+puts hiki2md.convert(source)

@@ -10,12 +10,17 @@ describe 'hiki2md command' do
       'RUBYLIB' => File.join(root, 'lib'),
       'RUBYOPT' => ''
     }
-    Open3.capture3(
+    stdout, stderr, status = Open3.capture3(
       environment,
       RbConfig.ruby,
       File.join(root, 'exe', 'hiki2md'),
       *arguments
     )
+    [
+      stdout.force_encoding(Encoding::UTF_8),
+      stderr.force_encoding(Encoding::UTF_8),
+      status
+    ]
   end
 
   it 'wires the InterWiki, WikiName, and plugin options together' do
@@ -49,6 +54,122 @@ describe 'hiki2md command' do
     stdout, _stderr, status = run_cli('--help')
 
     expect(status).to be_success
-    expect(stdout).to include('--[no-]wiki-name', '--preserve-plugins', '--interwiki-map')
+    expect(stdout).to include(
+      '--[no-]wiki-name',
+      '--preserve-plugins',
+      '--interwiki-map',
+      '--input-encoding'
+    )
+  end
+
+  it 'automatically converts EUC-JP input to UTF-8 Markdown' do
+    source_file = Tempfile.new(['hiki2md-euc-jp', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write(
+        "! 日本語\n本文\n日本WikiName語".encode(Encoding::EUC_JP)
+      )
+      source_file.close
+
+      stdout, _stderr, status = run_cli(source_file.path)
+
+      expect(status).to be_success
+      expect(stdout.encoding).to eq(Encoding::UTF_8)
+      expect(stdout).to eq("## 日本語\n本文\n日本WikiName語\n")
+    ensure
+      source_file.close!
+    end
+  end
+
+  it 'automatically converts Windows-31J input to UTF-8 Markdown' do
+    source_file = Tempfile.new(['hiki2md-windows-31j', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write("! ①\n本文".encode(Encoding::Windows_31J))
+      source_file.close
+
+      stdout, _stderr, status = run_cli(source_file.path)
+
+      expect(status).to be_success
+      expect(stdout).to eq("## ①\n本文\n")
+    ensure
+      source_file.close!
+    end
+  end
+
+  it 'recognizes ISO-2022-JP before its ASCII-compatible bytes as UTF-8' do
+    source_file = Tempfile.new(['hiki2md-iso-2022-jp', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write("! 日本語".encode(Encoding::ISO_2022_JP))
+      source_file.close
+
+      stdout, _stderr, status = run_cli(source_file.path)
+
+      expect(status).to be_success
+      expect(stdout).to eq("## 日本語\n")
+    ensure
+      source_file.close!
+    end
+  end
+
+  it 'removes a UTF-8 BOM before converting the first line' do
+    source_file = Tempfile.new(['hiki2md-utf8-bom', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write("\xEF\xBB\xBF! 日本語".b)
+      source_file.close
+
+      stdout, _stderr, status = run_cli(source_file.path)
+
+      expect(status).to be_success
+      expect(stdout).to eq("## 日本語\n")
+    ensure
+      source_file.close!
+    end
+  end
+
+  it 'accepts an explicit input encoding when auto detection is ambiguous' do
+    source_file = Tempfile.new(['hiki2md-iso-8859-1', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write("! caf\xE9".b)
+      source_file.close
+
+      stdout, _stderr, status = run_cli(
+        '--input-encoding', 'ISO-8859-1', source_file.path
+      )
+
+      expect(status).to be_success
+      expect(stdout).to eq("## café\n")
+    ensure
+      source_file.close!
+    end
+  end
+
+  it 'reports bytes that do not form supported text without replacing them' do
+    source_file = Tempfile.new(['hiki2md-invalid-encoding', '.hiki'])
+
+    begin
+      source_file.binmode
+      source_file.write("! text\xFF".b)
+      source_file.close
+
+      _stdout, stderr, status = run_cli(source_file.path)
+
+      expect(status).not_to be_success
+      expect(stderr).to include(
+        'unable to detect input encoding',
+        '--input-encoding ENCODING'
+      )
+      expect(stderr).not_to include('invalid byte sequence in UTF-8')
+    ensure
+      source_file.close!
+    end
   end
 end

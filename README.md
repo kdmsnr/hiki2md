@@ -57,6 +57,16 @@ Options:
 - `--[no-]wiki-name`: enable or disable automatic WikiName links.
 - `--preserve-plugins`: retain plugins as escaped Markdown text instead of
   removing them.
+- `-E`, `--input-encoding ENCODING`: override the detected source encoding.
+
+The command writes UTF-8 Markdown. It automatically recognizes BOM-marked
+Unicode input and the common Hiki encodings UTF-8, EUC-JP, Windows-31J, and
+ISO-2022-JP. Since legacy encodings can be ambiguous, use
+`--input-encoding` to specify the source explicitly when needed:
+
+```console
+$ hiki2md --input-encoding EUC-JP TextFormattingRules.ja
+```
 
 ### Supported Hiki syntax
 
