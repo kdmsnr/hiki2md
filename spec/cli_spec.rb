@@ -62,6 +62,45 @@ describe 'hiki2md command' do
     )
   end
 
+  it 'falls back to option help when no file is specified' do
+    stdout, stderr, status = run_cli
+    help_stdout, help_stderr, help_status = run_cli('--help')
+
+    expect(status).to be_success
+    expect(help_status).to be_success
+    expect(stdout).to eq(help_stdout)
+    expect(stderr).to eq(help_stderr)
+  end
+
+  it 'reports multiple input files as a concise usage error' do
+    stdout, stderr, status = run_cli('one.hiki', 'two.hiki')
+
+    expect(status).not_to be_success
+    expect(stdout).to be_empty
+    expect(stderr).to include(
+      'hiki2md: expected exactly one input file',
+      'Usage: hiki2md [options] <file>'
+    )
+    expect(stderr).not_to include('ArgumentError', "\tfrom ")
+  end
+
+  it 'reports options without an input file as a usage error' do
+    [
+      ['--preserve-plugins'],
+      ['--input-encoding', 'EUC-JP'],
+      ['--']
+    ].each do |arguments|
+      stdout, stderr, status = run_cli(*arguments)
+
+      expect(status).not_to be_success
+      expect(stdout).to be_empty
+      expect(stderr).to include(
+        'hiki2md: expected exactly one input file',
+        'Usage: hiki2md [options] <file>'
+      )
+    end
+  end
+
   it 'automatically converts EUC-JP input to UTF-8 Markdown' do
     source_file = Tempfile.new(['hiki2md-euc-jp', '.hiki'])
 

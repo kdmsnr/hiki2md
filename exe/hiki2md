@@ -86,7 +86,7 @@ use_wiki_name = true
 preserve_plugins = false
 input_encoding = nil
 
-OptionParser.new do |opts|
+option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: hiki2md [options] <file>"
 
   opts.on("--interwiki-map PATH", "Path to a YAML file for InterWiki definitions") do |path|
@@ -112,10 +112,20 @@ OptionParser.new do |opts|
   ) do |encoding|
     input_encoding = encoding
   end
-end.parse!
+end
+
+no_arguments = ARGV.empty?
+option_parser.parse!
+
+if no_arguments
+  puts option_parser
+  exit
+end
 
 if ARGV.size != 1
-  raise ArgumentError.new("no file specified")
+  warn "hiki2md: expected exactly one input file"
+  warn option_parser
+  exit 1
 end
 
 input_file = ARGV[0]
